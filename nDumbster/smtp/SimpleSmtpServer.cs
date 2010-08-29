@@ -294,7 +294,7 @@ namespace nDumbster.smtp
 			IList msgList = new ArrayList();
 			SmtpMessage msg = new SmtpMessage();
 
-			while (smtpState != SmtpState.CONNECT)
+			while (smtpState != SmtpState.CONNECT && smtpState != SmtpState.QUIT)
 			{
 				string line = input.ReadLine();
 
