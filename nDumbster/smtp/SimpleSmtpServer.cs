@@ -234,6 +234,7 @@ namespace nDumbster.smtp
 					{
 						if (socket != null)
 						{
+                            socket.Shutdown(SocketShutdown.Both);
 							socket.Close();
 						}
 						continue; // Non-blocking socket timeout occurred: try accept() again
@@ -250,6 +251,7 @@ namespace nDumbster.smtp
 						receivedMail.AddRange(HandleSmtpTransaction(output, input));
 					}
 					// Close client connection, and wait for another one
+                    socket.Shutdown(SocketShutdown.Both);
 					socket.Close();
 				}
 			}
