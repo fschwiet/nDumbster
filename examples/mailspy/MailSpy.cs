@@ -15,7 +15,8 @@ namespace mailspy
 		[STAThread]
 		static void Main(string[] args)
 		{
-			SimpleSmtpServer server= SimpleSmtpServer.Start();
+			SimpleSmtpServer server= new SimpleSmtpServer();
+            server.Start();
 			while(true)
 			{
 				if (server.ReceivedEmailCount > 0)

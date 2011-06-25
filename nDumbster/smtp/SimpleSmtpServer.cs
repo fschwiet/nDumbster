@@ -111,13 +111,15 @@ namespace nDumbster.smtp
 		/// </summary>
 		internal Exception mainThreadException = null;
 
-		#endregion // Members
+	    private Thread smtpServerThread;
+
+	    #endregion // Members
 
 		#region Contructors
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		private SimpleSmtpServer(int port)
+		public SimpleSmtpServer(int port = DEFAULT_SMTP_PORT)
 		{
 			this.port = port;
 			this.startedEvent = new AutoResetEvent(false);
@@ -361,48 +363,37 @@ namespace nDumbster.smtp
 					// Ignore
 				}
 			}
+
+            if (!smtpServerThread.Join(10 * 1000))
+            {
+                throw new TimeoutException("Timed out waiting for thread cleanup");
+            }
+
+		    smtpServerThread = null;
 		}
 
-		/// <overloads>
-		/// Creates an instance of SimpleSmtpServer and starts it.
-		///	</overloads>
-		/// <summary>
-		/// Creates and starts an instance of SimpleSmtpServer that will listen on the default port.
-		/// </summary>
-		/// <returns>The <see cref="SimpleSmtpServer">SmtpServer</see> waiting for message</returns>
-		public static SimpleSmtpServer Start()
-		{
-			return Start(DEFAULT_SMTP_PORT);
-		}
+		public void Start()
+	    {
+            if (smtpServerThread != null)
+                throw new ArgumentException();
 
-		/// <summary>
-		/// Creates and starts an instance of SimpleSmtpServer that will listen on a specific port.
-		/// </summary>
-		/// <param name="port">port number the server should listen to</param>
-		/// <returns>The <see cref="SimpleSmtpServer">SmtpServer</see> waiting for message</returns>
-		public static SimpleSmtpServer Start(int port)
-		{
-			SimpleSmtpServer server = new SimpleSmtpServer(port);
+	        smtpServerThread = new Thread(new ThreadStart(Run));
 
-			Thread smtpServerThread = new Thread(new ThreadStart(server.Run));
-			smtpServerThread.Start();
+	        smtpServerThread.Start();
 
-			// Block until the server socket is created
-			try 
-			{
-				server.startedEvent.WaitOne();
-			} 
-			catch 
-			{
-				// Ignore don't care.
-			}
+	        // Block until the server socket is created
+	        try 
+	        {
+	            startedEvent.WaitOne();
+	        } 
+	        catch 
+	        {
+	            // Ignore don't care.
+	        }
 
-			// If an exception occured during server startup, send it back.
-			if (server.mainThreadException != null)
-				throw server.mainThreadException;
-
-			return server;
-		}
-
+	        // If an exception occured during server startup, send it back.
+	        if (mainThreadException != null)
+	            throw mainThreadException;
+	    }
 	}
 }

@@ -21,9 +21,10 @@ namespace tests
 		}
 
 		[SetUp]
-		protected void setUp() 
+		protected void setUp()
 		{
-			server = SimpleSmtpServer.Start();
+		    server = new SimpleSmtpServer();
+            server.Start();
 			server2 = null;
 		}
 
@@ -152,7 +153,8 @@ namespace tests
 
 
 			server.Stop();
-			server = SimpleSmtpServer.Start();
+		    server.ClearReceivedEmail();
+			server.Start();
 
 			System.Web.Mail.SmtpMail.Send("somebody@foo.com", "nobody@bar.com", "This is the second subject", "This is the second body.");
 
@@ -175,7 +177,8 @@ namespace tests
 		public void ServerBindingError()
 		{
 			// Server is already running. We check that this cause an SocketException to be thrown
-			SimpleSmtpServer server2 = SimpleSmtpServer.Start();
+		    SimpleSmtpServer server2 = new SimpleSmtpServer();
+            server2.Start();
 
 			Assert.Fail("BindingError");
 		}
@@ -219,7 +222,8 @@ namespace tests
 			int ALT_PORT = 2525;
 
 			// Start second server
-			server2 = SimpleSmtpServer.Start(ALT_PORT);
+			server2 = new SimpleSmtpServer(ALT_PORT);
+            server2.Start();
 
 			// Send to first server
 			System.Web.Mail.SmtpMail.SmtpServer = "localhost";
